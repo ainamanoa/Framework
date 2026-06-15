@@ -10,7 +10,7 @@ compile() {
     echo "[INFO] initialisation du framework..."
     jar cf framework-m.jar -C bin/ . 
 
-    echo "[INFO] compilation terminee..."
+    echo "[INFO] compilation terminée..."
 }
 
 compile
