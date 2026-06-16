@@ -1,4 +1,4 @@
-package servlet;
+package com.itu.app.servlet;
 
 import java.io.*;
 import jakarta.servlet.*;
