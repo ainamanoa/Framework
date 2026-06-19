@@ -3,7 +3,7 @@
 compile() {
     echo "[INFO] compilation des fichiers sources..."
 
-    find src/java/ -iname "*.java" > sources.txt
+    find src/ -iname "*.java" > sources.txt
     javac -cp lib/* -d bin @sources.txt
     rm sources.txt
 
