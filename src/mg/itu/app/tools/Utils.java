@@ -1,15 +1,19 @@
 package mg.itu.app.tools;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.lang.annotation.Annotation;
 
 public class Utils {
 
-    public static List<String> getClassesContainingAnnotation(String packageName, Class<? extends Annotation> annotationClass) throws Exception {
-        List<Class<?>> classes = getClasses(packageName);
+    public static List<String> getClassesContainingAnnotation(String[] packageNames, Class<? extends Annotation> annotationClass) throws Exception {
+        List<Class<?>> classes = new ArrayList<>();
+        for (String packageName : packageNames) {
+            classes.addAll(getClasses(packageName));
+        }
+        
         List<String> annotatedClasses = new ArrayList<>();
 
         for (Class<?> clazz : classes) {
@@ -27,9 +31,14 @@ public class Utils {
         String path = packageName.replace('.', '/');
         URL resource = classLoader.getResource(path);
 
+        List<Class<?>> classes = new ArrayList<>();
+        
+        if (resource==null){
+            return classes;
+        }
+
         File directory = new File(resource.toURI());
 
-        List<Class<?>> classes = new ArrayList<>();
 
         for (File file : directory.listFiles()) {
             if (file.getName().endsWith(".class")) {
@@ -42,5 +51,9 @@ public class Utils {
         }
 
         return classes;
+    }
+
+    public static String[] getPackageNames(String name) {
+        return name.split(";");
     }
 }

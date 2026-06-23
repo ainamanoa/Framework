@@ -14,9 +14,10 @@ public class FrontControllerServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         String packageName = this.getInitParameter("packageName");
+        String[] packageNames = Utils.getPackageNames(packageName);
 
         try {
-            annotatedClasses = Utils.getClassesContainingAnnotation(packageName, Controller.class);
+            annotatedClasses = Utils.getClassesContainingAnnotation(packageNames, Controller.class);
         } catch (Exception e) {
             throw new ServletException("Error initializing annotated classes", e);
         }
