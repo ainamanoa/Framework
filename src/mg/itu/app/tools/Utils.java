@@ -2,9 +2,12 @@ package mg.itu.app.tools;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import mg.itu.app.annotation.URLMapping;
 
 public class Utils {
 
@@ -23,6 +26,37 @@ public class Utils {
         }
 
         return annotatedClasses;
+    }
+
+    public static void getURLMappings(String[] packageNames, Class<? extends Annotation> annotationClass, Class<? extends Annotation> methodAnnotationClass, Map<String, URLInfo> mappings) throws Exception {
+        List<Class<?>> classes = new ArrayList<>();
+        
+        for (String packageName : packageNames) {
+            classes.addAll(getClasses(packageName));
+        }
+        
+        List<Class<?>> annotatedClasses = new ArrayList<>();
+
+        for (Class<?> clazz : classes) {
+            if (clazz.isAnnotationPresent(annotationClass)) {
+                annotatedClasses.add(clazz);
+            }
+        }
+
+        for (Class<?> clazz : annotatedClasses) {
+            Method[] methods = clazz.getDeclaredMethods();
+            for (Method method : methods) {
+                if (method.isAnnotationPresent(methodAnnotationClass)) {
+                    URLInfo urlInfo = new URLInfo();
+                    urlInfo.setClazz(clazz);
+                    urlInfo.setMethod(method);
+
+                    URLMapping url = method.getAnnotation(URLMapping.class);
+
+                    mappings.put(url.value(), urlInfo);
+                }
+            }
+        }
     }
 
     public static List<Class<?>> getClasses(String packageName) throws Exception {
