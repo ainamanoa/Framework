@@ -70,6 +70,17 @@ public class FrontControllerServlet extends HttpServlet {
             isURLMappingsPopulated = true;
             sprint1 += "\nSPRINT2:\n";  
             sprint1 += "\n Mapped to class: " + urlInfo.getClazz().getName() + ", method: " + urlInfo.getMethod().getName() + ", URL: " + targetURLMethod.getUrl() + ", HTTP Method: " + targetURLMethod.getMethod();
+
+            try {
+                Object controllerInstance = urlInfo.getClazz().getDeclaredConstructor().newInstance();
+                Object result = urlInfo.getMethod().invoke(controllerInstance);
+
+                if (result != null) {
+                    sprint1 += "\nResult: " + result.toString();
+                }
+            } catch (Exception e) {
+                e.printStackTrace(out);
+            }
         }
 
         if (!isURLMappingsPopulated) {
