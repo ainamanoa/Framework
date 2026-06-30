@@ -11,10 +11,11 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import mg.itu.app.annotation.URLMapping;
+import mg.itu.app.tools.URLMethod;
 
 public class FrontControllerServlet extends HttpServlet {
     private List<String> annotatedClasses;
-    private Map<String, URLInfo> urlMappings = new HashMap<>();
+    private Map<URLMethod, URLInfo> urlMappings = new HashMap<>();
 
     @Override
     public void init() throws ServletException {
@@ -62,23 +63,20 @@ public class FrontControllerServlet extends HttpServlet {
 
         boolean isURLMappingsPopulated = false;
 
-        for (Map.Entry<String, URLInfo> entry : urlMappings.entrySet()) {
+        URLMethod targetURLMethod = new URLMethod(answer, request.getMethod());
+        URLInfo urlInfo = urlMappings.get(targetURLMethod);
 
-            if (entry.getKey().equals(answer)) {
-
-                isURLMappingsPopulated = true;
-                URLInfo urlInfo = entry.getValue();
-                sprint1 += "\nSPRINT2:\n";  
-                sprint1 += "\n Mapped to class: " + urlInfo.getClazz().getName() + ", method: " + urlInfo.getMethod().getName();
-                break;
-            }
+        if (urlInfo != null) {
+            isURLMappingsPopulated = true;
+            sprint1 += "\nSPRINT2:\n";  
+            sprint1 += "\n Mapped to class: " + urlInfo.getClazz().getName() + ", method: " + urlInfo.getMethod().getName() + ", URL: " + targetURLMethod.getUrl() + ", HTTP Method: " + targetURLMethod.getMethod();
         }
 
         if (!isURLMappingsPopulated) {
             sprint1 += "\nSPRINT2:\n";  
-            for (Map.Entry<String, URLInfo> entry : urlMappings.entrySet()) {
-                URLInfo urlInfo = entry.getValue();
-                sprint1 += "\n Mapped to class: " + urlInfo.getClazz().getName() + ", method: " + urlInfo.getMethod().getName() + ", URL: " + entry.getKey();
+            for (Map.Entry<URLMethod, URLInfo> entry : urlMappings.entrySet()) {
+                URLInfo urlInf = entry.getValue();
+                sprint1 += "\n Mapped to class: " + urlInf.getClazz().getName() + ", method: " + urlInf.getMethod().getName() + ", URL: " + entry.getKey().getUrl() + ", HTTP Method: " + entry.getKey().getMethod();
             }
         }
 

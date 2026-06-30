@@ -28,7 +28,7 @@ public class Utils {
         return annotatedClasses;
     }
 
-    public static void getURLMappings(String[] packageNames, Class<? extends Annotation> annotationClass, Class<? extends Annotation> methodAnnotationClass, Map<String, URLInfo> mappings) throws Exception {
+    public static void getURLMappings(String[] packageNames, Class<? extends Annotation> annotationClass, Class<? extends Annotation> methodAnnotationClass, Map<URLMethod, URLInfo> mappings) throws Exception {
         List<Class<?>> classes = new ArrayList<>();
         
         for (String packageName : packageNames) {
@@ -53,7 +53,7 @@ public class Utils {
 
                     URLMapping url = method.getAnnotation(URLMapping.class);
 
-                    mappings.put(url.value(), urlInfo);
+                    mappings.put(new URLMethod(url.url(), url.method()), urlInfo);
                 }
             }
         }
