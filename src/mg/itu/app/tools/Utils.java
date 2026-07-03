@@ -52,8 +52,13 @@ public class Utils {
                     urlInfo.setMethod(method);
 
                     URLMapping url = method.getAnnotation(URLMapping.class);
+                    URLMethod urlMethod = new URLMethod(url.url(), url.method());
 
-                    mappings.put(new URLMethod(url.url(), url.method()), urlInfo);
+                    if (mappings.containsKey(urlMethod)) {
+                        throw new Exception("Duplicate URL mapping found for " + url.url() + " with method " + url.method());
+                    }
+
+                    mappings.put(urlMethod, urlInfo);
                 }
             }
         }

@@ -15,17 +15,16 @@ import mg.itu.app.tools.URLMethod;
 
 public class FrontControllerServlet extends HttpServlet {
     private List<String> annotatedClasses;
-    private Map<URLMethod, URLInfo> urlMappings = new HashMap<>();
+    private Map<URLMethod, URLInfo> urlMappings;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        String packageName = this.getInitParameter("packageName");
-        String[] packageNames = Utils.getPackageNames(packageName);
+        ServletContext context = getServletContext();
 
         try {
-            annotatedClasses = Utils.getClassesContainingAnnotation(packageNames, Controller.class);
-            Utils.getURLMappings(packageNames, Controller.class, URLMapping.class, urlMappings);
+            annotatedClasses = (List<String>) context.getAttribute("annotatedClasses");
+            urlMappings = (Map<URLMethod, URLInfo>) context.getAttribute("urlMappings");
         } catch (Exception e) {
             throw new ServletException("Error initializing annotated classes", e);
         }
