@@ -12,15 +12,21 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import mg.itu.app.annotation.URLMapping;
 import mg.itu.app.tools.URLMethod;
+import mg.itu.app.tools.ModelAndView;
 
 public class FrontControllerServlet extends HttpServlet {
     private List<String> annotatedClasses;
     private Map<URLMethod, URLInfo> urlMappings;
+    private String prefix;
+    private String suffix;
 
     @Override
     public void init() throws ServletException {
         super.init();
         ServletContext context = getServletContext();
+
+        prefix = this.getInitParameter("prefix");
+        suffix = this.getInitParameter("suffix");
 
         try {
             annotatedClasses = (List<String>) context.getAttribute("annotatedClasses");
@@ -75,7 +81,23 @@ public class FrontControllerServlet extends HttpServlet {
                 Object result = urlInfo.getMethod().invoke(controllerInstance);
 
                 if (result != null) {
-                    sprint1 += "\nResult: " + result.toString();
+                    if (result instanceof ModelAndView) {
+                        ModelAndView modelAndView = (ModelAndView) result;
+                        String viewName = modelAndView.getView();
+                        Map<String, Object> model = modelAndView.getModel();
+
+                        for ( Map.Entry<String, Object> entry : model.entrySet() ) {
+                            String key = entry.getKey();
+                            Object value = entry.getValue();
+
+                            request.setAttribute(key, value);
+                        }
+
+                        request.getRequestDispatcher(prefix + viewName + suffix).forward(request, response);
+
+                    } else {
+                        sprint1 += "\nResult: " + result.toString();
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace(out);
