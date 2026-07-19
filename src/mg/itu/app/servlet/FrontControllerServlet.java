@@ -13,6 +13,8 @@ import java.util.Map.Entry;
 import mg.itu.app.annotation.URLMapping;
 import mg.itu.app.tools.URLMethod;
 import mg.itu.app.tools.ModelAndView;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 public class FrontControllerServlet extends HttpServlet {
     private List<String> annotatedClasses;
@@ -55,6 +57,15 @@ public class FrontControllerServlet extends HttpServlet {
 
         out.println("SPRINT 0: " + answer);
 
+        Map<String, String[]> params = request.getParameterMap();
+
+        for (Map.Entry<String, String[]> entry : params.entrySet()) {
+            String key = entry.getKey();
+            String[] values = entry.getValue();
+
+            out.println(key + "=" + String.join(",", values));
+        }
+
         String sprint1="";
 
         if (annotatedClasses != null && !annotatedClasses.isEmpty()) {
@@ -78,7 +89,27 @@ public class FrontControllerServlet extends HttpServlet {
 
             try {
                 Object controllerInstance = urlInfo.getClazz().getDeclaredConstructor().newInstance();
-                Object result = urlInfo.getMethod().invoke(controllerInstance);
+
+                Object result = null;
+                boolean hasParam = false;
+
+                for (Class<?> paramType : urlInfo.getMethod().getParameterTypes()) {
+
+                    if (paramType.equals(WebApplicationContext.class)) {
+
+                        WebApplicationContext wac =
+                            WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
+
+                        result = urlInfo.getMethod().invoke(controllerInstance, wac);
+
+                        hasParam = true;
+                        break;
+                    }
+                }
+
+                if (!hasParam) {
+                    result = urlInfo.getMethod().invoke(controllerInstance);
+                }
 
                 if (result != null) {
                     if (result instanceof ModelAndView) {
