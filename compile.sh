@@ -1,20 +1,31 @@
-#! /bin/bash
+#!/bin/bash
 
 compile() {
+
+    echo "[INFO] nettoyage du projet..."
+
+    mvn clean
+
+
     echo "[INFO] compilation des fichiers sources..."
 
-    find src/ -iname "*.java" > sources.txt
-    javac -cp lib/* -d bin @sources.txt
-    rm sources.txt
+    mvn package
+
 
     echo "[INFO] initialisation du framework..."
-    jar cf framework-m.jar -C bin/ . 
+
+    cp target/framework-m.jar framework-m.jar
+
 
     echo "[INFO] exportation du framework..."
-    rm /home/manoa/Documents/ITU/L2/S3/TRAININGS/VAHATRINIAINA/SERVLET/COLLABS/lib/framework-m.jar
+
+    rm -f /home/manoa/Documents/ITU/L2/S3/TRAININGS/VAHATRINIAINA/SERVLET/COLLABS/lib/framework-m.jar
+
     cp framework-m.jar /home/manoa/Documents/ITU/L2/S3/TRAININGS/VAHATRINIAINA/SERVLET/COLLABS/lib/
 
+
     echo "[INFO] compilation terminée..."
+
 }
 
 compile
