@@ -6,6 +6,7 @@ import jakarta.servlet.http.*;
 import mg.itu.app.tools.Utils;
 import java.util.List;
 import mg.itu.app.annotation.Controller;
+import mg.itu.app.annotation.RestAPI;
 import mg.itu.app.tools.URLInfo;
 import java.util.Map;
 import java.util.HashMap;
@@ -13,6 +14,9 @@ import java.util.Map.Entry;
 import mg.itu.app.annotation.URLMapping;
 import mg.itu.app.tools.URLMethod;
 import mg.itu.app.tools.ModelAndView;
+import mg.itu.app.tools.Response;
+import mg.itu.app.tools.JsonConverter;
+
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -55,7 +59,7 @@ public class FrontControllerServlet extends HttpServlet {
         String context = request.getContextPath();
         String answer = path.substring(context.length());
 
-        out.println("SPRINT 0: " + answer);
+        // out.println("SPRINT 0: " + answer);
 
         Map<String, String[]> params = request.getParameterMap();
 
@@ -112,6 +116,24 @@ public class FrontControllerServlet extends HttpServlet {
                 }
 
                 if (result != null) {
+                    if (urlInfo.getMethod().isAnnotationPresent(RestAPI.class)) {
+
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+
+                        if (result instanceof Response) {
+                            response.getWriter().write(((Response) result).getBody());
+                        } else {
+                            try {
+                                String json = JsonConverter.convertToJson(result);
+                                response.getWriter().write(json);
+
+                            } catch (Exception e) {
+                                throw new ServletException("Erreur conversion JSON",e);
+                            }
+                        }
+                        return;
+                    }
                     if (result instanceof ModelAndView) {
                         ModelAndView modelAndView = (ModelAndView) result;
                         String viewName = modelAndView.getView();
