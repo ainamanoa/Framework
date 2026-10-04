@@ -4,10 +4,13 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import mg.itu.app.annotation.URLMapping;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Utils {
 
@@ -94,5 +97,33 @@ public class Utils {
 
     public static String[] getPackageNames(String name) {
         return name.split(";");
+    }
+
+    public static Object conversion(Class<?> type, String value) {
+        if (value == null) {
+            return null;
+        }
+
+        Object resultat = null;
+        
+        if (type.equals(String.class)) { 
+            resultat = value; 
+        } else if (type.equals(int.class) || type.equals(Integer.class)) { 
+            resultat = Integer.parseInt(value); 
+        } else if (type.equals(long.class) || type.equals(Long.class)) { 
+            resultat = Long.parseLong(value); 
+        } else if (type.equals(double.class) || type.equals(Double.class)) { 
+            resultat = Double.parseDouble(value); 
+        } else if (type.equals(float.class) || type.equals(Float.class)) { 
+            resultat = Float.parseFloat(value); 
+        } else if (type.equals(boolean.class) || type.equals(Boolean.class)) { 
+            resultat = Boolean.parseBoolean(value); 
+        } else if (type.equals(LocalDate.class)) { 
+            resultat = LocalDate.parse(value); 
+        } else if (type.equals(LocalDateTime.class)) { 
+            resultat = LocalDateTime.parse(value); 
+        }
+
+        return resultat;
     }
 }
