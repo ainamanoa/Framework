@@ -1,24 +1,26 @@
 package mg.itu.app.servlet;
 
-import java.io.*;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import mg.itu.app.tools.Utils;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
-import mg.itu.app.annotation.Controller;
-import mg.itu.app.annotation.RestAPI;
-import mg.itu.app.tools.URLInfo;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import mg.itu.app.annotation.URLMapping;
-import mg.itu.app.tools.URLMethod;
-import mg.itu.app.tools.ModelAndView;
-import mg.itu.app.tools.Response;
-import mg.itu.app.tools.JsonConverter;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import java.lang.reflect.Parameter;
+
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import mg.itu.app.annotation.RestAPI;
+import mg.itu.app.tools.JsonConverter;
+import mg.itu.app.tools.ModelAndView;
+import mg.itu.app.tools.Response;
+import mg.itu.app.tools.URLInfo;
+import mg.itu.app.tools.URLMethod;
+import mg.itu.app.tools.Utils;
 
 public class FrontControllerServlet extends HttpServlet {
     private List<String> annotatedClasses;
@@ -95,24 +97,40 @@ public class FrontControllerServlet extends HttpServlet {
                 Object controllerInstance = urlInfo.getClazz().getDeclaredConstructor().newInstance();
 
                 Object result = null;
-                boolean hasParam = false;
 
-                for (Class<?> paramType : urlInfo.getMethod().getParameterTypes()) {
-
-                    if (paramType.equals(WebApplicationContext.class)) {
-
+                Parameter[] parameters = urlInfo.getMethod().getParameters();
+                Object[] args = new Object[parameters.length];
+                
+                for (int i=0; i<parameters.length; i++) {
+                    if (parameters[i].getType().equals(WebApplicationContext.class)) {
                         WebApplicationContext wac =
                             WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
 
-                        result = urlInfo.getMethod().invoke(controllerInstance, wac);
-
-                        hasParam = true;
-                        break;
+                        args[i] = wac;
+                    } else {
+                        String value = request.getParameter(parameters[i].getName());
+                        args[i] = Utils.conversion(parameters[i].getType(), value);
                     }
                 }
 
-                if (!hasParam) {
+                // for (Class<?> paramType : urlInfo.getMethod().getParameterTypes()) {
+
+                //     if (paramType.equals(WebApplicationContext.class)) {
+
+                //         WebApplicationContext wac =
+                //             WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
+
+                //         result = urlInfo.getMethod().invoke(controllerInstance, wac);
+
+                //         hasParam = true;
+                //         break;
+                //     }
+                // }
+
+                if (args.length == 0) {
                     result = urlInfo.getMethod().invoke(controllerInstance);
+                } else {
+                    result = urlInfo.getMethod().invoke(controllerInstance, args);
                 }
 
                 if (result != null) {
