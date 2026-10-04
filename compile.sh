@@ -19,9 +19,9 @@ compile() {
 
     echo "[INFO] exportation du framework..."
 
-    rm -f /home/manoa/Documents/ITU/L2/S3/TRAININGS/VAHATRINIAINA/SERVLET/COLLABS/lib/framework-m.jar
+    rm -f /home/manoa/Documents/ITU/L2/COLLABS/lib/framework-m.jar
 
-    cp framework-m.jar /home/manoa/Documents/ITU/L2/S3/TRAININGS/VAHATRINIAINA/SERVLET/COLLABS/lib/
+    cp framework-m.jar /home/manoa/Documents/ITU/L2/COLLABS/lib/
 
 
     echo "[INFO] compilation terminée..."
