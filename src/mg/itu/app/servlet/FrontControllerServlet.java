@@ -98,8 +98,36 @@ public class FrontControllerServlet extends HttpServlet {
 
                 Object result = null;
 
+                String contentType = request.getContentType();
+                boolean isJson = contentType != null && contentType.contains("application/json");
+                
+                String jsonBody = null;
+
+                if (isJson) {
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = request.getReader().readLine()) != null) {
+                        sb.append(line);
+                    }
+                    jsonBody = sb.toString();
+                }
+
                 Parameter[] parameters = urlInfo.getMethod().getParameters();
                 Object[] args = new Object[parameters.length];
+
+                if (isJson) {
+                    int nbrParams = 0;
+
+                    for (Parameter parameter : parameters) {
+                        if (!parameter.getType().equals(WebApplicationContext.class)) {
+                            nbrParams++;
+                        }
+                    }
+
+                    if (nbrParams != 1) {
+                        throw new IllegalArgumentException("Nombre parametres invalid : " + nbrParams);
+                    }
+                }
                 
                 for (int i=0; i<parameters.length; i++) {
                     if (parameters[i].getType().equals(WebApplicationContext.class)) {
@@ -107,11 +135,14 @@ public class FrontControllerServlet extends HttpServlet {
                             WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
 
                         args[i] = wac;
+                    } else if (isJson) {
+                        args[i] = JsonConverter.convertFromJson(jsonBody, JsonConverter.getJavaType(parameters[i].getParameterizedType()));
                     } else {
-                        String value = request.getParameter(parameters[i].getName());
-                        args[i] = Utils.conversion(parameters[i].getType(), value);
+                        args[i] = Utils.resolveParameter(parameters[i], request);
                     }
                 }
+
+                result = urlInfo.getMethod().invoke( controllerInstance, args );
 
                 // for (Class<?> paramType : urlInfo.getMethod().getParameterTypes()) {
 
