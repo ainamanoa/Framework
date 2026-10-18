@@ -1,14 +1,14 @@
 package mg.itu.app.tools;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
-import jakarta.servlet.ServletException;
-import mg.itu.app.annotation.URLMapping;
-import jakarta.servlet.ServletContext;
 import mg.itu.app.annotation.Controller;
+import mg.itu.app.annotation.URLMapping;
 
 public class InitData implements ServletContextListener {
     private List<String> annotatedClasses;
