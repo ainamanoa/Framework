@@ -7,6 +7,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,14 +19,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-
+import java.util.UUID;
 import java.lang.reflect.Type;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 import mg.itu.app.annotation.URLMapping;
+import mg.itu.app.config.FrameworkConfig;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.lang.reflect.Array;
+import java.io.IOException;
 
 public class Utils {
 
@@ -352,6 +359,58 @@ public class Utils {
             return bindCollection(parameter, request);
         }
 
+        if (parameter.getType().equals(MapFile.class)) {
+            Part part = request.getPart(parameter.getName());
+            return convertToMapFile(part);
+        }
+
         return bindingObject(type, request);
+    }
+
+    public static MapFile convertToMapFile(Part part) throws IOException {
+        if (part == null) {
+            return null;
+        }
+
+        String filename = part.getSubmittedFileName();
+
+        if (filename == null || filename.isBlank() ) {
+            return null;
+        }
+
+        filename = filename.replaceAll("\\\\", "/");
+        filename = filename.substring(filename.lastIndexOf("/") + 1);
+
+        String extension = "";
+        int dotIndex = filename.lastIndexOf(".");
+
+        if (dotIndex > 0 && dotIndex < filename.length() - 1) {
+            extension = filename.substring(dotIndex + 1);
+        }
+
+        byte[] content = part.getInputStream().readAllBytes();
+
+        return new MapFile(filename, extension, content);
+    }
+
+    public static Path saveMapFile(MapFile file) throws IOException {
+
+        String directory = FrameworkConfig.getUploadDirectory();
+
+        Path uploadPath = Paths.get(directory);
+        Files.createDirectories(uploadPath);
+
+        String extension = file.getExtension();
+        String filename = UUID.randomUUID().toString();
+
+        if (extension != null && !extension.isBlank()) {
+            filename += "." + extension;
+        }
+
+        Path destination = uploadPath.resolve(filename);
+
+        Files.write(destination, file.getContent());
+
+        return destination;
     }
 }

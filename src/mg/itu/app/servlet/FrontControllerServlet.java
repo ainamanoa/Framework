@@ -11,6 +11,7 @@ import java.lang.reflect.Parameter;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,6 +23,7 @@ import mg.itu.app.tools.URLInfo;
 import mg.itu.app.tools.URLMethod;
 import mg.itu.app.tools.Utils;
 
+@MultipartConfig 
 public class FrontControllerServlet extends HttpServlet {
     private List<String> annotatedClasses;
     private Map<URLMethod, URLInfo> urlMappings;
