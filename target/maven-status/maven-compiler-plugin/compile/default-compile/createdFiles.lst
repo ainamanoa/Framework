@@ -8,6 +8,7 @@ mg/itu/app/tools/Response.class
 mg/itu/app/tools/ModelAndView.class
 mg/itu/app/servlet/FrontControllerServlet.class
 mg/itu/app/config/FrameworkConfig.class
+mg/itu/app/tools/MaSession.class
 mg/itu/app/tools/JsonConverter.class
 mg/itu/app/tools/InitData.class
 mg/itu/app/tools/URLInfo.class
