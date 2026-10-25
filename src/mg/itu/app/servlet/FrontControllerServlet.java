@@ -2,12 +2,12 @@ package mg.itu.app.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
-import java.lang.reflect.Parameter;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mg.itu.app.annotation.RestAPI;
 import mg.itu.app.tools.JsonConverter;
+import mg.itu.app.tools.MaSession;
 import mg.itu.app.tools.ModelAndView;
 import mg.itu.app.tools.Response;
 import mg.itu.app.tools.URLInfo;
@@ -130,6 +131,8 @@ public class FrontControllerServlet extends HttpServlet {
                         throw new IllegalArgumentException("Nombre parametres invalid : " + nbrParams);
                     }
                 }
+
+                MaSession session = null;
                 
                 for (int i=0; i<parameters.length; i++) {
                     if (parameters[i].getType().equals(WebApplicationContext.class)) {
@@ -137,6 +140,11 @@ public class FrontControllerServlet extends HttpServlet {
                             WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
 
                         args[i] = wac;
+                    } else if (parameters[i].getType().equals(MaSession.class)) {
+                        session = new MaSession();
+
+                        session.copySessionToMap(request.getSession());
+                        args[i] = session;
                     } else if (isJson) {
                         args[i] = JsonConverter.convertFromJson(jsonBody, JsonConverter.getJavaType(parameters[i].getParameterizedType()));
                     } else {
@@ -164,6 +172,10 @@ public class FrontControllerServlet extends HttpServlet {
                     result = urlInfo.getMethod().invoke(controllerInstance);
                 } else {
                     result = urlInfo.getMethod().invoke(controllerInstance, args);
+                }
+                
+                if (session != null) {
+                    session.updateHttpSession(request.getSession());
                 }
 
                 if (result != null) {

@@ -5,6 +5,7 @@
 /home/manoa/Documents/ITU/L2/Framework/src/mg/itu/app/servlet/FrontControllerServlet.java
 /home/manoa/Documents/ITU/L2/Framework/src/mg/itu/app/tools/InitData.java
 /home/manoa/Documents/ITU/L2/Framework/src/mg/itu/app/tools/JsonConverter.java
+/home/manoa/Documents/ITU/L2/Framework/src/mg/itu/app/tools/MaSession.java
 /home/manoa/Documents/ITU/L2/Framework/src/mg/itu/app/tools/MapFile.java
 /home/manoa/Documents/ITU/L2/Framework/src/mg/itu/app/tools/ModelAndView.java
 /home/manoa/Documents/ITU/L2/Framework/src/mg/itu/app/tools/Response.java
