@@ -1,6 +1,7 @@
 mg/itu/app/annotation/RestAPI.class
 mg/itu/app/annotation/Controller.class
 mg/itu/app/tools/MapFile.class
+mg/itu/app/annotation/Roles.class
 mg/itu/app/annotation/Auth.class
 mg/itu/app/tools/Utils.class
 mg/itu/app/annotation/URLMapping.class
