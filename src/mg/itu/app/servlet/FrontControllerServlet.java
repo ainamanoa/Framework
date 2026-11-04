@@ -134,7 +134,14 @@ public class FrontControllerServlet extends HttpServlet {
                     }
                 }
 
-                Object controllerInstance = urlInfo.getClazz().getDeclaredConstructor().newInstance();
+                Object controllerInstance = null;
+
+                if (getServletContext().getAttribute(urlInfo.getClazz().getName()) != null) {
+                    controllerInstance = getServletContext().getAttribute(urlInfo.getClazz().getName());
+                } else {
+                    controllerInstance = urlInfo.getClazz().getDeclaredConstructor().newInstance();
+                    getServletContext().setAttribute(urlInfo.getClazz().getName(), controllerInstance);
+                }
 
                 Object result = null;
 
