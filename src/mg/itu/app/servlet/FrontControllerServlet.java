@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -15,7 +16,10 @@ import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import mg.itu.app.annotation.RestAPI;
+import mg.itu.app.annotation.Auth;
+import mg.itu.app.annotation.Roles;
 import mg.itu.app.tools.JsonConverter;
 import mg.itu.app.tools.MaSession;
 import mg.itu.app.tools.ModelAndView;
@@ -30,6 +34,8 @@ public class FrontControllerServlet extends HttpServlet {
     private Map<URLMethod, URLInfo> urlMappings;
     private String prefix;
     private String suffix;
+    private String authSessionName;
+    private String roleSessionName;
 
     @Override
     public void init() throws ServletException {
@@ -38,6 +44,8 @@ public class FrontControllerServlet extends HttpServlet {
 
         prefix = this.getInitParameter("prefix");
         suffix = this.getInitParameter("suffix");
+        authSessionName = this.getInitParameter("authSessionName");
+        roleSessionName = this.getInitParameter("roleSessionName");
 
         try {
             annotatedClasses = (List<String>) context.getAttribute("annotatedClasses");
@@ -97,6 +105,35 @@ public class FrontControllerServlet extends HttpServlet {
             sprint1 += "\n Mapped to class: " + urlInfo.getClazz().getName() + ", method: " + urlInfo.getMethod().getName() + ", URL: " + targetURLMethod.getUrl() + ", HTTP Method: " + targetURLMethod.getMethod();
 
             try {
+                if (urlInfo.getMethod().isAnnotationPresent(Auth.class)) {
+                    if ( request.getSession().getAttribute(authSessionName) == null ) {
+                        out.println("Veuillez vous authentifier pour accéder à cette méthode");
+                        return;
+                    }
+                }
+
+                if (urlInfo.getMethod().isAnnotationPresent(Roles.class)) {
+                    if ( request.getSession().getAttribute(authSessionName) == null ) {
+                        out.println("Veuillez vous authentifier pour accéder à cette méthode");
+                        return;
+                    }
+
+                    if ( request.getSession().getAttribute(roleSessionName) == null ) {
+                        out.println("Vous n'avez pas l'autorisation d'exécuter cette méthode");
+                        return;
+                    } else {
+                        String role = (String) request.getSession().getAttribute(roleSessionName);
+                        
+                        Roles roles = urlInfo.getMethod().getAnnotation(Roles.class);
+                        String[] rolesValues = roles.value();
+
+                        if ( !Arrays.asList(rolesValues).contains(role) ) {
+                            out.println("Vous n'avez pas l'autorisation d'exécuter cette méthode");
+                            return;
+                        }
+                    }
+                }
+
                 Object controllerInstance = urlInfo.getClazz().getDeclaredConstructor().newInstance();
 
                 Object result = null;
@@ -141,9 +178,16 @@ public class FrontControllerServlet extends HttpServlet {
 
                         args[i] = wac;
                     } else if (parameters[i].getType().equals(MaSession.class)) {
-                        session = new MaSession();
+                        HttpSession httpSession = request.getSession();
 
+                        if (getServletContext().getAttribute(httpSession.getId()) != null) {
+                            session = (MaSession) getServletContext().getAttribute(httpSession.getId());
+                        } else {
+                            session = new MaSession();
+                        }
+                        
                         session.copySessionToMap(request.getSession());
+                        getServletContext().setAttribute(httpSession.getId(), session);
                         args[i] = session;
                     } else if (isJson) {
                         args[i] = JsonConverter.convertFromJson(jsonBody, JsonConverter.getJavaType(parameters[i].getParameterizedType()));
